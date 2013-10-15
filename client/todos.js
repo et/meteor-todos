@@ -25,7 +25,7 @@ var listsHandle = Meteor.subscribe('lists', function () {
   if (!Session.get('list_id')) {
     var list = Lists.findOne({}, {sort: {name: 1}});
     if (list)
-      Router.setList(list._id);
+      Router.setList(list.name);
   }
 });
 
@@ -87,7 +87,7 @@ Template.lists.lists = function () {
 
 Template.lists.events({
   'mousedown .list': function (evt) { // select list
-    Router.setList(this._id);
+    Router.setList(this.name);
   },
   'click .list': function (evt) {
     // prevent clicks on <a> from refreshing the page.
@@ -106,7 +106,7 @@ Template.lists.events(okCancelEvents(
   {
     ok: function (text, evt) {
       var id = Lists.insert({name: text});
-      Router.setList(id);
+      Router.setList(text);
       evt.target.value = "";
     }
   }));
@@ -302,17 +302,17 @@ Template.tag_filter.events({
 
 var TodosRouter = Backbone.Router.extend({
   routes: {
-    ":list_id": "main"
+    ":list_name": "main"
   },
-  main: function (list_id) {
-    var oldList = Session.get("list_id");
-    if (oldList !== list_id) {
-      Session.set("list_id", list_id);
+  main: function (list_name) {
+    var list = Lists.findOne({ name: list_name });
+    if (list) {
+      Session.set("list_id", list._id);
       Session.set("tag_filter", null);
     }
   },
-  setList: function (list_id) {
-    this.navigate(list_id, true);
+  setList: function (list_name) {
+    this.navigate(list_name, true);
   }
 });
 
